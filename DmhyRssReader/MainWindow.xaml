@@ -78,6 +78,8 @@
                                 Header="名称" />
                             <DataGridTextColumn
                                 Header="URL" />
+                            <DataGridTextColumn
+                                Header="更新时间" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>
@@ -111,6 +113,8 @@
                                 Header="更新日期" />
                             <DataGridTextColumn
                                 Header="磁力链接" />
+                            <DataGridCheckBoxColumn
+                                Header="已下载" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>
