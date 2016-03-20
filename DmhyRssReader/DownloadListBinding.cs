@@ -1,21 +1,29 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Security.Cryptography;
+using System.Windows;
 
 namespace DmhyRssReader
 {
-    class DownloadListBinding : INotifyPropertyChanged
+    public class DownloadListBinding : INotifyPropertyChanged, IEquatable<DownloadListBinding>
     {
-        private RssListBinding rss;
-        public RssListBinding RSS
+        private bool selected;
+        public bool Selected
         {
             get
             {
-                return this.rss;
+                return this.selected;
             }
             set
             {
-                this.rss = value;
-                this.OnPropertyChanged("RSS");
+                this.selected = value;
+                RaisePropertyChanged("Selected");
             }
+        }
+        public RssListBinding RSS
+        {
+            get;
+            set;
         }
 
         private string title;
@@ -28,36 +36,34 @@ namespace DmhyRssReader
             set
             {
                 this.title = value;
-                this.OnPropertyChanged("Title");
+                RaisePropertyChanged("Title");
             }
         }
 
-        private string updateTime;
-        public string Updatetime
+        private DateTime updateTimeValue;
+        public DateTime UpdateTimeValue
         {
             get
             {
-                return this.updateTime;
+                return this.updateTimeValue;
             }
             set
             {
-                this.updateTime = value;
-                this.OnPropertyChanged("UpdateTime");
+                this.updateTimeValue = value;
+                RaisePropertyChanged("UpdateTime");
             }
         }
-
-        private string magnetLink;
-        public string Magnetlink
+        public string UpdateTime
         {
             get
             {
-                return this.magnetLink;
+                return this.updateTimeValue.ToString("f");
             }
-            set
-            {
-                this.magnetLink = value;
-                this.OnPropertyChanged("MagnetLink");
-            }
+        }
+        public string MagnetLink
+        {
+            get;
+            set;
         }
 
         private bool downloaded;
@@ -70,17 +76,61 @@ namespace DmhyRssReader
             set
             {
                 this.downloaded = value;
-                this.OnPropertyChanged("Downloaded");
+                RaisePropertyChanged("Downloaded");
             }
         }
 
+        private string guid;
+        public string GUID
+        {
+            get
+            {
+                return this.guid;
+            }
+            set
+            {
+                this.guid = value;
+            }
+        }
+
+        public string MD5
+        {
+            get
+            {
+                MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+                byte[] byteValue = System.Text.Encoding.UTF8.GetBytes(this.GUID);
+                byte[] byteHash = md5.ComputeHash(byteValue);
+                md5.Clear();
+                string sTemp = "";
+                for (int i = 0; i < byteHash.Length; i++)
+                {
+                    sTemp += byteHash[i].ToString("X").PadLeft(2, '0');
+                }
+                return sTemp.ToLower();
+            }
+        }
+
+        public static RssListBinding SelectedRss;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged(string propertyName)
+        protected virtual void RaisePropertyChanged(string propertyName)
         {
-            if (this.PropertyChanged != null)
+            if (PropertyChanged != null)
             {
-                this.PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public bool Equals(DownloadListBinding other)
+        {
+            if (this.MD5.Equals(other.MD5))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
     }

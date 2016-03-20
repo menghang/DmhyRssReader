@@ -1,21 +1,32 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Security.Cryptography;
+using System.Windows;
 
 namespace DmhyRssReader
 {
-    public class RssListBinding : INotifyPropertyChanged
+    public class RssListBinding : INotifyPropertyChanged, IEquatable<RssListBinding>
     {
-        private bool seleted;
-        public bool Seleted
+        public static readonly RssListBinding SpecialRss
+            = new RssListBinding()
+            {
+                Name = "全部项目",
+                Selected = true,
+                URL = ""
+            };
+
+        private bool selected;
+        public bool Selected
         {
             get
             {
-                return this.seleted;
+                return this.selected;
             }
             set
             {
-                this.seleted = value;
-                this.OnPropertyChanged("Seleted");
+                this.selected = value;
+                RaisePropertyChanged("Selected");
+                RaisePropertyChanged("Show");
             }
         }
 
@@ -29,7 +40,7 @@ namespace DmhyRssReader
             set
             {
                 this.name = value;
-                this.OnPropertyChanged("Name");
+                RaisePropertyChanged("Name");
             }
         }
 
@@ -43,7 +54,7 @@ namespace DmhyRssReader
             set
             {
                 this.url = value;
-                this.OnPropertyChanged("URL");
+                RaisePropertyChanged("URL");
             }
         }
 
@@ -57,7 +68,7 @@ namespace DmhyRssReader
             set
             {
                 this.updateTimeValue = value;
-                this.OnPropertyChanged("UpdateTime");
+                RaisePropertyChanged("UpdateTime");
             }
         }
         public string UpdateTime
@@ -68,13 +79,57 @@ namespace DmhyRssReader
             }
         }
 
+        public string MD5
+        {
+            get
+            {
+                MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+                byte[] byteValue = System.Text.Encoding.UTF8.GetBytes(this.URL);
+                byte[] byteHash = md5.ComputeHash(byteValue);
+                md5.Clear();
+                string sTemp = "";
+                for (int i = 0; i < byteHash.Length; i++)
+                {
+                    sTemp += byteHash[i].ToString("X").PadLeft(2, '0');
+                }
+                return sTemp.ToLower();
+            }
+        }
+
+        public Visibility Show
+        {
+            get
+            {
+                if (this.selected)
+                {
+                    return Visibility.Visible;
+                }
+                else
+                {
+                    return Visibility.Collapsed;
+                }
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged(string propertyName)
+        protected virtual void RaisePropertyChanged(string propertyName)
         {
-            if (this.PropertyChanged != null)
+            if (PropertyChanged != null)
             {
-                this.PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public bool Equals(RssListBinding other)
+        {
+            if (this.MD5.Equals(other.MD5))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
     }
