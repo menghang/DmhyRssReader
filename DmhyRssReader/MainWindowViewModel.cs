@@ -27,18 +27,32 @@ namespace DmhyRssReader
             get;
             set;
         }
-        private RssListBinding selectedRss;
+
         public RssListBinding SelectedRss
         {
-            private set
-            {
-                this.selectedRss = value;
-                DownloadListBinding.SelectedRss = this.selectedRss;
-                //RaisePropertyChanged("DownloadList");
-            }
+            private set;
+            get;
+        }
+
+        private bool useSystemProxy;
+        public bool UseSystemProxy
+        {
             get
             {
-                return this.selectedRss;
+                return this.useSystemProxy;
+            }
+            set
+            {
+                this.useSystemProxy = value;
+                RaisePropertyChanged("UseSystemProxy");
+                RaisePropertyChanged("UseCustomProxy");
+            }
+        }
+        public bool UseCustomProxy
+        {
+            get
+            {
+                return !this.useSystemProxy;
             }
         }
 
@@ -49,6 +63,7 @@ namespace DmhyRssReader
             this.RssListEx = new ObservableCollection<RssListBinding>(this.RssList);
             this.RssListEx.Insert(0, RssListBinding.SpecialRss);
             this.SelectedRss = RssListBinding.SpecialRss;
+            this.UseSystemProxy = true;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

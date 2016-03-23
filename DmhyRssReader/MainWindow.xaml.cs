@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Xml;
+using MahApps.Metro;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using Microsoft.Win32;
@@ -26,8 +27,12 @@ namespace DmhyRssReader
         private static readonly int MaxThreadNumber = 10;
         private readonly MainWindowViewModel viewModel;
         private CustomDialog rssDialog;
+        private CustomDialog proxyDialog;
         private Database database;
         private Hashtable downloadListAll;
+        private bool useSystemProxy;
+        private string proxyServer;
+        private int proxyPort;
 
         public MainWindow()
         {
@@ -38,8 +43,10 @@ namespace DmhyRssReader
             InitializeComponent();
 
             this.rssDialog = this.Resources["RssDialog"] as CustomDialog;
+            this.proxyDialog = this.Resources["ProxyDialog"] as CustomDialog;
             this.downloadListAll = new Hashtable();
             this.comboBoxDownloadList.SelectionChanged += comboBoxDownloadList_SelectionChanged;
+            this.useSystemProxy = this.viewModel.UseSystemProxy;
         }
 
         private async void buttonAddRss_Click(object sender, RoutedEventArgs e)
@@ -212,7 +219,14 @@ namespace DmhyRssReader
             HttpWebRequest httpWebRequest = HttpWebRequest.Create(rlb.URL) as HttpWebRequest;
             httpWebRequest.UserAgent = UserAgent;
 
-            httpWebRequest.Proxy = WebRequest.GetSystemWebProxy();
+            if (this.useSystemProxy)
+            {
+                httpWebRequest.Proxy = WebRequest.GetSystemWebProxy();
+            }
+            else
+            {
+                httpWebRequest.Proxy = new WebProxy(this.proxyServer,this.proxyPort);
+            }
 
             using (HttpWebResponse httpWebResponse = httpWebRequest.GetResponse() as HttpWebResponse)
             {
@@ -325,6 +339,104 @@ namespace DmhyRssReader
                     }
                 }
             }
+        }
+
+        private static class CustomAppTheme
+        {
+            private static readonly string[] color =
+            {
+                "Red", "Green", "Blue", "Purple", "Orange",
+                "Lime", "Emerald", "Teal", "Cyan", "Cobalt",
+                "Indigo", "Violet", "Pink", "Magenta", "Crimson",
+                "Amber", "Yellow", "Brown", "Olive", "Steel",
+                "Mauve", "Taupe", "Sienna"
+            };
+
+            public static string GetNextColor(string current)
+            {
+                string next = null;
+                if (current == null)
+                {
+                    return CustomAppTheme.color[0];
+                }
+                bool isNext = false;
+                foreach (string color in CustomAppTheme.color)
+                {
+                    if (color.Equals(current))
+                    {
+                        isNext = true;
+                        continue;
+                    }
+                    if (isNext)
+                    {
+                        next = color;
+                        break;
+                    }
+                }
+                if (next == null)
+                {
+                    return CustomAppTheme.color[0];
+                }
+                else
+                {
+                    return next;
+                }
+            }
+        }
+
+        private void ButtonTheme_Click(object sender, RoutedEventArgs e)
+        {
+            Tuple<AppTheme, Accent> appStyle = ThemeManager.DetectAppStyle(Application.Current);
+            string color = appStyle.Item2.Name;
+            ThemeManager.ChangeAppStyle(Application.Current,
+                                    ThemeManager.GetAccent(CustomAppTheme.GetNextColor(color)),
+                                    ThemeManager.GetAppTheme("BaseLight"));
+        }
+
+        private async void ButtonProxy_Click(object sender, RoutedEventArgs e)
+        {
+            this.proxyDialog.Title = "代理服务器设置";
+            await this.ShowMetroDialogAsync(this.proxyDialog);
+
+            Button buttonProxyOK = proxyDialog.FindChild<Button>("buttonProxyOK");
+            Button buttonProxyCancel = proxyDialog.FindChild<Button>("buttonProxyCancel");
+            TextBox textBoxProxyServer = proxyDialog.FindChild<TextBox>("textBoxProxyServer");
+            TextBox textBoxProxyPort = proxyDialog.FindChild<TextBox>("textBoxProxyPort");
+
+            this.viewModel.UseSystemProxy = this.useSystemProxy;
+            if (!this.useSystemProxy)
+            {
+                textBoxProxyServer.Text = this.proxyServer;
+                textBoxProxyPort.Text = this.proxyPort.ToString();
+            }
+
+            RoutedEventHandler proxyDialogButtonOKClick = null;
+            RoutedEventHandler proxyDialogButtonCancelClick = null;
+            proxyDialogButtonOKClick = async (o, args) =>
+            {
+                buttonProxyOK.Click -= proxyDialogButtonOKClick;
+                buttonProxyCancel.Click -= proxyDialogButtonCancelClick;
+
+                this.useSystemProxy = this.viewModel.UseSystemProxy;
+
+                if (!this.viewModel.UseSystemProxy)
+                {
+                    this.proxyServer = textBoxProxyServer.Text;
+                    this.proxyPort = Convert.ToInt32(textBoxProxyPort.Text);
+                }
+
+                await this.HideMetroDialogAsync(this.proxyDialog);
+            };
+            proxyDialogButtonCancelClick = async (o, args) =>
+            {
+                buttonProxyOK.Click -= proxyDialogButtonOKClick;
+                buttonProxyCancel.Click -= proxyDialogButtonCancelClick;
+
+                await this.HideMetroDialogAsync(this.proxyDialog);
+            };
+
+            buttonProxyOK.Click += proxyDialogButtonOKClick;
+            buttonProxyCancel.Click += proxyDialogButtonCancelClick;
         }
     }
 }
