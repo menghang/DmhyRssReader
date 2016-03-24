@@ -277,7 +277,7 @@
                         Margin="5"
                         Height="30" />
                     <TextBox
-                        x:Name="textBoxRssProxyPort"
+                        x:Name="textBoxProxyPort"
                         Margin="5"
                         IsEnabled="{Binding UseCustomProxy}"
                         VerticalContentAlignment="Center" />
