@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
 using System.ServiceModel.Syndication;
@@ -225,7 +224,7 @@ namespace DmhyRssReader
             }
             else
             {
-                httpWebRequest.Proxy = new WebProxy(this.proxyServer,this.proxyPort);
+                httpWebRequest.Proxy = new WebProxy(this.proxyServer, this.proxyPort);
             }
 
             using (HttpWebResponse httpWebResponse = httpWebRequest.GetResponse() as HttpWebResponse)

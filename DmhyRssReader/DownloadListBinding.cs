@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Security.Cryptography;
-using System.Windows;
 
 namespace DmhyRssReader
 {
