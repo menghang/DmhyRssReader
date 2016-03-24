@@ -13,7 +13,8 @@
     Height="450"
     Width="800"
     MinWidth="600"
-    MinHeight="400">
+    MinHeight="400"
+    Icon="flower_32px.ico">
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
             <Button
