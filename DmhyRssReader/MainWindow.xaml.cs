@@ -252,8 +252,8 @@ namespace DmhyRssReader
                                 }
                             }
                             dlb.GUID = si.Id;
-                            dlb.Selected = true;
                             dlb.Downloaded = this.database.IsDownloaded(dlb);
+                            dlb.Selected = !dlb.Downloaded;
                             lock (LockdownloadListAll)
                             {
                                 if (!this.downloadListAll.Contains(dlb.MD5))
