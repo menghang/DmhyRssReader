@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.ServiceModel.Syndication;
@@ -24,6 +25,7 @@ namespace DmhyRssReader
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2679.0 Safari/537.36";
         private static Object LockdownloadListAll = new Object();
         private static readonly int MaxThreadNumber = 10;
+        private static readonly string DefaultExplorer = "chrome.exe";
         private readonly MainWindowViewModel viewModel;
         private CustomDialog rssDialog;
         private CustomDialog proxyDialog;
@@ -436,6 +438,22 @@ namespace DmhyRssReader
 
             buttonProxyOK.Click += proxyDialogButtonOKClick;
             buttonProxyCancel.Click += proxyDialogButtonCancelClick;
+        }
+
+        private void dataGridDownloadList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            DownloadListBinding dlb = (sender as DataGrid).SelectedItem as DownloadListBinding;
+            if (dlb != null)
+            {
+                try
+                {
+                    Process.Start(DefaultExplorer, dlb.GUID);
+                }
+                catch
+                {
+                    Process.Start(dlb.GUID);
+                }
+            }
         }
     }
 }
