@@ -285,29 +285,35 @@ namespace DmhyRssReader
             {
                 ProgressDialogController pdc = await this.ShowProgressAsync("导出下载列表", "操作进行中", false);
                 pdc.SetIndeterminate();
-                await Task.Run(new Action(() =>
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    using (FileStream fs = new FileStream(dialog.FileName, FileMode.Create))
+                    foreach (DictionaryEntry de in this.downloadListAll)
                     {
-                        using (StreamWriter sw = new StreamWriter(fs))
+                        DownloadListBinding dlb = de.Value as DownloadListBinding;
+                        if (dlb.Selected)
                         {
-                            foreach (DictionaryEntry de in this.downloadListAll)
+                            byte[] tmpData = System.Text.Encoding.Default.GetBytes(dlb.MagnetLink + Environment.NewLine);
+                            await ms.WriteAsync(tmpData, 0, tmpData.Length).ConfigureAwait(false);
+                            if (!dlb.Downloaded)
                             {
-                                DownloadListBinding dlb = de.Value as DownloadListBinding;
-                                if (dlb.Selected)
-                                {
-                                    sw.WriteLine(dlb.MagnetLink);
-                                    if (!dlb.Downloaded)
-                                    {
-                                        this.database.AddDownloadedList(dlb);
-                                    }
-                                    dlb.Downloaded = true;
-                                }
+                                await Task.Run(new Action(() => this.database.AddDownloadedList(dlb))).ConfigureAwait(false);
                             }
-                            sw.Flush();
+                            dlb.Downloaded = true;
                         }
                     }
-                }));
+
+                    string tmpStr = System.Text.Encoding.Default.GetString(ms.ToArray());
+                    this.Dispatcher.Invoke(new Action(() =>
+                    {
+                        Clipboard.Clear();
+                        Clipboard.SetData(DataFormats.Text, tmpStr);
+                    }));
+
+                    using (FileStream fs = new FileStream(dialog.FileName, FileMode.Create))
+                    {
+                        await fs.WriteAsync(ms.ToArray(), 0, (int)ms.Length).ConfigureAwait(false);
+                    }
+                }
                 await pdc.CloseAsync();
             }
         }
