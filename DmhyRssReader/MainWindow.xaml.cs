@@ -159,30 +159,6 @@ namespace DmhyRssReader
             this.database.RemoveRssList(rlb);
         }
 
-        private void Freeze()
-        {
-            this.dataGridRssList.IsEnabled = false;
-            this.buttonAddRss.IsEnabled = false;
-            this.buttonEditRss.IsEnabled = false;
-            this.buttonDeleteRss.IsEnabled = false;
-            this.dataGridDownloadList.IsEnabled = false;
-            this.comboBoxDownloadList.IsEnabled = false;
-            this.buttonUpdateDownloadlist.IsEnabled = false;
-            this.buttonSaveDownloadList.IsEnabled = false;
-        }
-
-        private void Melt()
-        {
-            this.dataGridRssList.IsEnabled = true;
-            this.buttonAddRss.IsEnabled = true;
-            this.buttonEditRss.IsEnabled = true;
-            this.buttonDeleteRss.IsEnabled = true;
-            this.dataGridDownloadList.IsEnabled = true;
-            this.comboBoxDownloadList.IsEnabled = true;
-            this.buttonUpdateDownloadlist.IsEnabled = true;
-            this.buttonSaveDownloadList.IsEnabled = true;
-        }
-
         private async void buttonUpdateDownloadlist_Click(object sender, RoutedEventArgs e)
         {
             ProgressDialogController pdc = await this.ShowProgressAsync("更新下载列表", "操作进行中", false);
@@ -320,11 +296,7 @@ namespace DmhyRssReader
 
         private void comboBoxDownloadList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Freeze();
-
             UpdateDataGridDownloadList();
-
-            Melt();
         }
 
         private void UpdateDataGridDownloadList()
