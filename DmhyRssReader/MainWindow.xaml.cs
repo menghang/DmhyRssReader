@@ -322,44 +322,19 @@ namespace DmhyRssReader
 
         private static class CustomAppTheme
         {
-            private static readonly string[] color =
-            {
-                "Red", "Green", "Blue", "Purple", "Orange",
+            private static readonly Queue<string> color = new Queue<string>
+            (
+                new string[] { "Red", "Green", "Purple", "Orange",
                 "Lime", "Emerald", "Teal", "Cyan", "Cobalt",
                 "Indigo", "Violet", "Pink", "Magenta", "Crimson",
                 "Amber", "Yellow", "Brown", "Olive", "Steel",
-                "Mauve", "Taupe", "Sienna"
-            };
+                "Mauve", "Taupe", "Sienna" }
+            );
 
             public static string GetNextColor(string current)
             {
-                string next = null;
-                if (current == null)
-                {
-                    return CustomAppTheme.color[0];
-                }
-                bool isNext = false;
-                foreach (string color in CustomAppTheme.color)
-                {
-                    if (color.Equals(current))
-                    {
-                        isNext = true;
-                        continue;
-                    }
-                    if (isNext)
-                    {
-                        next = color;
-                        break;
-                    }
-                }
-                if (next == null)
-                {
-                    return CustomAppTheme.color[0];
-                }
-                else
-                {
-                    return next;
-                }
+                color.Enqueue(current);
+                return color.Dequeue();
             }
         }
 
