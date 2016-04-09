@@ -174,12 +174,12 @@ namespace DmhyRssReader
                 {
                     if (taskList.Count < MaxThreadNumber)
                     {
-                        taskList.Add(Task.Run(new Action(() => GetRSS(rlb))));
+                        taskList.Add(GetRSS(rlb));
                     }
                     else
                     {
                         await Task.WhenAny(taskList);
-                        taskList.Add(Task.Run(new Action(() => GetRSS(rlb))));
+                        taskList.Add(GetRSS(rlb));
                     }
                 }
             }
@@ -191,8 +191,10 @@ namespace DmhyRssReader
             await pdc.CloseAsync();
         }
 
-        private void GetRSS(RssListBinding rlb)
+        private async Task GetRSS(RssListBinding rlb)
         {
+            this.database.UpdateRssList(rlb);
+
             HttpWebRequest httpWebRequest = HttpWebRequest.Create(rlb.URL) as HttpWebRequest;
             httpWebRequest.UserAgent = UserAgent;
 
@@ -205,7 +207,7 @@ namespace DmhyRssReader
                 httpWebRequest.Proxy = new WebProxy(this.proxyServer, this.proxyPort);
             }
 
-            using (HttpWebResponse httpWebResponse = httpWebRequest.GetResponse() as HttpWebResponse)
+            using (HttpWebResponse httpWebResponse = (await httpWebRequest.GetResponseAsync()) as HttpWebResponse)
             {
                 using (Stream responseStream = httpWebResponse.GetResponseStream())
                 {
@@ -245,7 +247,7 @@ namespace DmhyRssReader
                         }
 
                         rlb.UpdateTimeValue = lastUpdateTime;
-                        this.database.UpdateRssListUpdateTime(rlb);
+                        this.database.UpdateRssList(rlb);
                     }
                 }
             }

@@ -67,7 +67,7 @@ namespace DmhyRssReader
                     }
 
                     DataTable dt2 = sh.GetColumnStatus("RssList");
-                    bool[] flag1 = { false, false, false, false };
+                    bool[] flag1 = { false, false, false, false ,false};
 
                     foreach (DataRow dr2 in dt2.Rows)
                     {
@@ -99,8 +99,15 @@ namespace DmhyRssReader
                             flag1[3] = true;
                             continue;
                         }
+                        if ((dr2["type"] as string).Equals("text")
+                            && (dr2["name"] as string).Equals("Selected")
+                            && Convert.ToInt32(dr2["pk"]) == 0)
+                        {
+                            flag1[4] = true;
+                            continue;
+                        }
                     }
-                    if (!flag1[0] || !flag1[1] || !flag1[2] || !flag1[3])
+                    if (!flag1[0] || !flag1[1] || !flag1[2] || !flag1[3] || !flag1[4])
                     {
                         conn.Close();
                         return true;
@@ -185,6 +192,7 @@ namespace DmhyRssReader
                     tb.Columns.Add(new SQLiteColumn("Url", ColType.Text));
                     tb.Columns.Add(new SQLiteColumn("UpdateTime", ColType.DateTime));
                     tb.Columns.Add(new SQLiteColumn("Md5", ColType.Text, true, false, true, null));
+                    tb.Columns.Add(new SQLiteColumn("Selected", ColType.Text));
                     helper.CreateTable(tb);
 
                     SQLiteTable tb2 = new SQLiteTable("DownloadedList");
@@ -218,7 +226,7 @@ namespace DmhyRssReader
                     {
                         RssListBinding rlb = new RssListBinding();
                         rlb.Name = dr["Name"] as string;
-                        rlb.Selected = true;
+                        rlb.Selected = (dr["Selected"] as string).Equals("True");
                         rlb.UpdateTimeValue = Convert.ToDateTime(dr["UpdateTime"]);
                         rlb.URL = dr["Url"] as string;
                         rlbc.Add(rlb);
@@ -246,6 +254,7 @@ namespace DmhyRssReader
                         dic["Url"] = rlb.URL;
                         dic["UpdateTime"] = rlb.UpdateTimeValue.ToString("s");
                         dic["Md5"] = rlb.MD5;
+                        dic["Selected"] = rlb.Selected ? "True" : "False";
 
                         helper.Insert("RssList", dic);
 
@@ -276,7 +285,7 @@ namespace DmhyRssReader
             }
         }
 
-        public void UpdateRssListUpdateTime(RssListBinding rlb)
+        public void UpdateRssList(RssListBinding rlb)
         {
             lock (lockThis)
             {
@@ -293,6 +302,7 @@ namespace DmhyRssReader
                         dic["Url"] = rlb.URL;
                         dic["UpdateTime"] = rlb.UpdateTimeValue.ToString("s");
                         dic["Md5"] = rlb.MD5;
+                        dic["Selected"] = rlb.Selected ? "True" : "False";
 
                         helper.Update("RssList", dic, "Md5", rlb.MD5);
 

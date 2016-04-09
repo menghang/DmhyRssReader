@@ -90,8 +90,7 @@
                         <DataGridTextColumn
                             Header="URL"
                             Binding="{Binding URL}"
-                            IsReadOnly="True"
-                            Width="*" />
+                            IsReadOnly="True" />
                         <DataGridTextColumn
                             Header="更新时间"
                             Binding="{Binding UpdateTime}"
@@ -168,8 +167,7 @@
                         <DataGridTextColumn
                             Header="标题"
                             Binding="{Binding Title}"
-                            IsReadOnly="True"
-                            Width="*" />
+                            IsReadOnly="True" />
                         <DataGridTextColumn
                             Header="更新日期"
                             Binding="{Binding UpdateTime}"
