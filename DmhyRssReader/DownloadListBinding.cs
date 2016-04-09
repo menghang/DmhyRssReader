@@ -4,92 +4,63 @@ using System.Security.Cryptography;
 
 namespace DmhyRssReader
 {
-    public class DownloadListBinding : INotifyPropertyChanged, IEquatable<DownloadListBinding>
+    internal class DownloadListBinding : INotifyPropertyChanged, IEquatable<DownloadListBinding>
     {
         private bool selected;
         public bool Selected
         {
-            get
-            {
-                return this.selected;
-            }
+            get { return this.selected; }
             set
             {
                 this.selected = value;
-                RaisePropertyChanged("Selected");
+                RaisePropertyChanged(nameof(Selected));
             }
         }
-        public RssListBinding RSS
-        {
-            get;
-            set;
-        }
+        public RssListBinding RSS { get; set; }
 
         private string title;
         public string Title
         {
-            get
-            {
-                return this.title;
-            }
+            get { return this.title; }
             set
             {
                 this.title = value;
-                RaisePropertyChanged("Title");
+                RaisePropertyChanged(nameof(Title));
             }
         }
 
         private DateTime updateTimeValue;
         public DateTime UpdateTimeValue
         {
-            get
-            {
-                return this.updateTimeValue;
-            }
+            get { return this.updateTimeValue; }
             set
             {
                 this.updateTimeValue = value;
-                RaisePropertyChanged("UpdateTime");
+                RaisePropertyChanged(nameof(UpdateTime));
             }
         }
         public string UpdateTime
         {
-            get
-            {
-                return this.updateTimeValue.ToString("f");
-            }
+            get { return this.updateTimeValue.ToString("f"); }
         }
-        public string MagnetLink
-        {
-            get;
-            set;
-        }
+        public string MagnetLink { get; set; }
 
         private bool downloaded;
         public bool Downloaded
         {
-            get
-            {
-                return this.downloaded;
-            }
+            get { return this.downloaded; }
             set
             {
                 this.downloaded = value;
-                RaisePropertyChanged("Downloaded");
+                RaisePropertyChanged(nameof(Downloaded));
             }
         }
 
         private string guid;
         public string GUID
         {
-            get
-            {
-                return this.guid;
-            }
-            set
-            {
-                this.guid = value;
-            }
+            get { return this.guid; }
+            set { this.guid = value; }
         }
 
         public string MD5
@@ -115,10 +86,7 @@ namespace DmhyRssReader
 
         protected virtual void RaisePropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public bool Equals(DownloadListBinding other)

@@ -7,11 +7,11 @@ using System.IO;
 
 namespace DmhyRssReader
 {
-    public class Database
+    internal class Database
     {
-        private const string DatabaseFile = "data.db";
+        private static readonly string DatabaseFile = "data.db";
 
-        private static Object lockThis = new Object();
+        private static object lockThis = new object();
 
         public ObservableCollection<RssListBinding> DatabaseInitialize()
         {

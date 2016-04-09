@@ -5,7 +5,7 @@ using System.Windows;
 
 namespace DmhyRssReader
 {
-    public class RssListBinding : INotifyPropertyChanged, IEquatable<RssListBinding>
+    internal class RssListBinding : INotifyPropertyChanged, IEquatable<RssListBinding>
     {
         public static readonly RssListBinding SpecialRss
             = new RssListBinding()
@@ -18,39 +18,30 @@ namespace DmhyRssReader
         private bool selected;
         public bool Selected
         {
-            get
-            {
-                return this.selected;
-            }
+            get { return this.selected; }
             set
             {
                 this.selected = value;
-                RaisePropertyChanged("Selected");
-                RaisePropertyChanged("Show");
+                RaisePropertyChanged(nameof(Selected));
+                RaisePropertyChanged(nameof(Show));
             }
         }
 
         private string name;
         public string Name
         {
-            get
-            {
-                return this.name;
-            }
+            get { return this.name; }
             set
             {
                 this.name = value;
-                RaisePropertyChanged("Name");
+                RaisePropertyChanged(nameof(Name));
             }
         }
 
         private string url;
         public string URL
         {
-            get
-            {
-                return this.url;
-            }
+            get { return this.url; }
             set
             {
                 this.url = value;
@@ -61,22 +52,16 @@ namespace DmhyRssReader
         private DateTime updateTimeValue;
         public DateTime UpdateTimeValue
         {
-            get
-            {
-                return this.updateTimeValue;
-            }
+            get { return this.updateTimeValue; }
             set
             {
                 this.updateTimeValue = value;
-                RaisePropertyChanged("UpdateTime");
+                RaisePropertyChanged(nameof(UpdateTime));
             }
         }
         public string UpdateTime
         {
-            get
-            {
-                return this.updateTimeValue.ToString("f");
-            }
+            get { return this.updateTimeValue.ToString("f"); }
         }
 
         public string MD5
@@ -115,10 +100,7 @@ namespace DmhyRssReader
 
         protected virtual void RaisePropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public bool Equals(RssListBinding other)

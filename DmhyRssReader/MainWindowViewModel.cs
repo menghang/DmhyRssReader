@@ -3,52 +3,30 @@ using System.ComponentModel;
 
 namespace DmhyRssReader
 {
-    public class MainWindowViewModel : INotifyPropertyChanged
+    internal class MainWindowViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<RssListBinding> RssList
-        {
-            get;
-            set;
-        }
+        public ObservableCollection<RssListBinding> RssList { get; set; }
 
-        public ObservableCollection<RssListBinding> RssListEx
-        {
-            get;
-            set;
-        }
-        
-        public ObservableCollection<DownloadListBinding> DownloadList
-        {
-            get;
-            set;
-        }
+        public ObservableCollection<RssListBinding> RssListEx { get; set; }
 
-        public RssListBinding SelectedRss
-        {
-            private set;
-            get;
-        }
+        public ObservableCollection<DownloadListBinding> DownloadList { get; set; }
+
+        public RssListBinding SelectedRss { private set; get; }
 
         private bool useSystemProxy;
         public bool UseSystemProxy
         {
-            get
-            {
-                return this.useSystemProxy;
-            }
+            get { return this.useSystemProxy; }
             set
             {
                 this.useSystemProxy = value;
-                RaisePropertyChanged("UseSystemProxy");
-                RaisePropertyChanged("UseCustomProxy");
+                RaisePropertyChanged(nameof(UseSystemProxy));
+                RaisePropertyChanged(nameof(UseCustomProxy));
             }
         }
         public bool UseCustomProxy
         {
-            get
-            {
-                return !this.useSystemProxy;
-            }
+            get { return !this.useSystemProxy; }
         }
 
         public MainWindowViewModel(Database _database)
@@ -65,10 +43,7 @@ namespace DmhyRssReader
 
         protected virtual void RaisePropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
