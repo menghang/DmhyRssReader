@@ -170,6 +170,7 @@ namespace DmhyRssReader
 
             foreach (RssListBinding rlb in this.viewModel.RssList)
             {
+                this.database.UpdateRssList(rlb);
                 if (rlb.Selected)
                 {
                     if (taskList.Count < MaxThreadNumber)
@@ -193,8 +194,6 @@ namespace DmhyRssReader
 
         private async Task GetRSS(RssListBinding rlb)
         {
-            this.database.UpdateRssList(rlb);
-
             HttpWebRequest httpWebRequest = HttpWebRequest.Create(rlb.URL) as HttpWebRequest;
             httpWebRequest.UserAgent = UserAgent;
 
