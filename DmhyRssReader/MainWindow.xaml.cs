@@ -170,7 +170,7 @@ namespace DmhyRssReader
 
             foreach (RssListBinding rlb in this.viewModel.RssList)
             {
-                this.database.UpdateRssList(rlb);
+                await Task.Run(new Action(() => this.database.UpdateRssList(rlb))).ConfigureAwait(false);
                 if (rlb.Selected)
                 {
                     if (taskList.Count < MaxThreadNumber)
@@ -179,7 +179,7 @@ namespace DmhyRssReader
                     }
                     else
                     {
-                        await Task.WhenAny(taskList);
+                        taskList.Remove(await Task.WhenAny(taskList));
                         taskList.Add(GetRSS(rlb));
                     }
                 }
@@ -187,14 +187,14 @@ namespace DmhyRssReader
 
             await Task.WhenAll(taskList);
 
-            UpdateDataGridDownloadList();
+            await this.Dispatcher.BeginInvoke(new Action (()=> UpdateDataGridDownloadList()));
 
             await pdc.CloseAsync();
         }
 
         private async Task GetRSS(RssListBinding rlb)
         {
-            HttpWebRequest httpWebRequest = HttpWebRequest.Create(rlb.URL) as HttpWebRequest;
+            HttpWebRequest httpWebRequest = WebRequest.Create(rlb.URL) as HttpWebRequest;
             httpWebRequest.UserAgent = UserAgent;
 
             if (this.useSystemProxy)
