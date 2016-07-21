@@ -24,7 +24,7 @@ namespace DmhyRssReader
         private static readonly string UserAgent =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2679.0 Safari/537.36";
         private static Object LockdownloadListAll = new Object();
-        private static readonly int MaxThreadNumber = 10;
+        private static readonly int MaxThreadNumber = 5;
         private static readonly string DefaultExplorer = "chrome.exe";
         private readonly MainWindowViewModel viewModel;
         private CustomDialog rssDialog;
