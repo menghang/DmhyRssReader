@@ -265,7 +265,8 @@
                         x:Name="textBoxProxyServer"
                         Margin="5"
                         IsEnabled="{Binding UseCustomProxy}"
-                        VerticalContentAlignment="Center" />
+                        VerticalContentAlignment="Center"
+                        Text="127.0.0.1" />
                 </DockPanel>
                 <DockPanel
                     DockPanel.Dock="Top"
@@ -280,7 +281,8 @@
                         x:Name="textBoxProxyPort"
                         Margin="5"
                         IsEnabled="{Binding UseCustomProxy}"
-                        VerticalContentAlignment="Center" />
+                        VerticalContentAlignment="Center"
+                        Text="1080" />
                 </DockPanel>
                 <UniformGrid
                     DockPanel.Dock="Bottom"
