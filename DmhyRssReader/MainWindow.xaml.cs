@@ -144,7 +144,6 @@ namespace DmhyRssReader
 
             buttonOK.Click += addRssDialogButtonOKClick;
             buttonCancel.Click += addRssDialogButtonCancelClick;
-
         }
 
         private void buttonDeleteRss_Click(object sender, RoutedEventArgs e)
@@ -163,11 +162,9 @@ namespace DmhyRssReader
         {
             ProgressDialogController pdc = await this.ShowProgressAsync("更新下载列表", "操作进行中", false);
             pdc.SetIndeterminate();
-
             this.downloadListAll.Clear();
 
             List<Task> taskList = new List<Task>();
-
             foreach (RssListBinding rlb in this.viewModel.RssList)
             {
                 await Task.Run(new Action(() => this.database.UpdateRssList(rlb))).ConfigureAwait(false);
@@ -187,7 +184,7 @@ namespace DmhyRssReader
 
             await Task.WhenAll(taskList);
 
-            await this.Dispatcher.BeginInvoke(new Action (()=> UpdateDataGridDownloadList()));
+            await this.Dispatcher.BeginInvoke(new Action(() => UpdateDataGridDownloadList()));
 
             await pdc.CloseAsync();
         }
@@ -205,56 +202,61 @@ namespace DmhyRssReader
             {
                 httpWebRequest.Proxy = new WebProxy(this.proxyServer, this.proxyPort);
             }
-
-            using (HttpWebResponse httpWebResponse = (await httpWebRequest.GetResponseAsync()) as HttpWebResponse)
+            try
             {
-                using (Stream responseStream = httpWebResponse.GetResponseStream())
+                using (HttpWebResponse httpWebResponse = (await httpWebRequest.GetResponseAsync()) as HttpWebResponse)
                 {
-                    using (XmlReader xmlReader = XmlReader.Create(responseStream))
+                    using (Stream responseStream = httpWebResponse.GetResponseStream())
                     {
-                        SyndicationFeed syndicationFeed = SyndicationFeed.Load(xmlReader);
-
-                        DateTime lastUpdateTime = rlb.UpdateTimeValue;
-
-                        foreach (SyndicationItem si in syndicationFeed.Items)
+                        using (XmlReader xmlReader = XmlReader.Create(responseStream))
                         {
-                            DownloadListBinding dlb = new DownloadListBinding();
-                            dlb.RSS = rlb;
-                            dlb.Title = si.Title.Text;
-                            dlb.UpdateTimeValue = si.PublishDate.DateTime;
-                            foreach (SyndicationLink sl in si.Links)
-                            {
-                                if (sl.MediaType != null && sl.MediaType.Equals("application/x-bittorrent"))
-                                {
-                                    dlb.MagnetLink = sl.Uri.AbsoluteUri;
-                                }
-                            }
-                            dlb.GUID = si.Id;
-                            dlb.Downloaded = this.database.IsDownloaded(dlb);
-                            dlb.Selected = !dlb.Downloaded;
-                            lock (LockdownloadListAll)
-                            {
-                                if (!this.downloadListAll.Contains(dlb.MD5))
-                                {
-                                    this.downloadListAll.Add(dlb.MD5, dlb);
-                                }
-                            }
-                            if (dlb.UpdateTimeValue > lastUpdateTime)
-                            {
-                                lastUpdateTime = dlb.UpdateTimeValue;
-                            }
-                        }
+                            SyndicationFeed syndicationFeed = SyndicationFeed.Load(xmlReader);
 
-                        rlb.UpdateTimeValue = lastUpdateTime;
-                        this.database.UpdateRssList(rlb);
+                            DateTime lastUpdateTime = rlb.UpdateTimeValue;
+
+                            foreach (SyndicationItem si in syndicationFeed.Items)
+                            {
+                                DownloadListBinding dlb = new DownloadListBinding();
+                                dlb.RSS = rlb;
+                                dlb.Title = si.Title.Text;
+                                dlb.UpdateTimeValue = si.PublishDate.DateTime;
+                                foreach (SyndicationLink sl in si.Links)
+                                {
+                                    if (sl.MediaType != null && sl.MediaType.Equals("application/x-bittorrent"))
+                                    {
+                                        dlb.MagnetLink = sl.Uri.AbsoluteUri;
+                                    }
+                                }
+                                dlb.GUID = si.Id;
+                                dlb.Downloaded = this.database.IsDownloaded(dlb);
+                                dlb.Selected = !dlb.Downloaded;
+                                lock (LockdownloadListAll)
+                                {
+                                    if (!this.downloadListAll.Contains(dlb.MD5))
+                                    {
+                                        this.downloadListAll.Add(dlb.MD5, dlb);
+                                    }
+                                }
+                                if (dlb.UpdateTimeValue > lastUpdateTime)
+                                {
+                                    lastUpdateTime = dlb.UpdateTimeValue;
+                                }
+                            }
+
+                            rlb.UpdateTimeValue = lastUpdateTime;
+                            this.database.UpdateRssList(rlb);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private async void buttonSaveDownloadList_Click(object sender, RoutedEventArgs e)
         {
-
             SaveFileDialog dialog = new SaveFileDialog();
             dialog.Title = "选择保存位置";
             dialog.Filter = "TXT文件(*.txt)|*.txt";
@@ -262,34 +264,41 @@ namespace DmhyRssReader
             {
                 ProgressDialogController pdc = await this.ShowProgressAsync("导出下载列表", "操作进行中", false);
                 pdc.SetIndeterminate();
-                using (MemoryStream ms = new MemoryStream())
+                try
                 {
-                    foreach (DictionaryEntry de in this.downloadListAll)
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        DownloadListBinding dlb = de.Value as DownloadListBinding;
-                        if (dlb.Selected)
+                        foreach (DictionaryEntry de in this.downloadListAll)
                         {
-                            byte[] tmpData = System.Text.Encoding.Default.GetBytes(dlb.MagnetLink + Environment.NewLine);
-                            await ms.WriteAsync(tmpData, 0, tmpData.Length).ConfigureAwait(false);
-                            if (!dlb.Downloaded)
+                            DownloadListBinding dlb = de.Value as DownloadListBinding;
+                            if (dlb.Selected)
                             {
-                                await Task.Run(new Action(() => this.database.AddDownloadedList(dlb))).ConfigureAwait(false);
+                                byte[] tmpData = System.Text.Encoding.Default.GetBytes(dlb.MagnetLink + Environment.NewLine);
+                                await ms.WriteAsync(tmpData, 0, tmpData.Length).ConfigureAwait(false);
+                                if (!dlb.Downloaded)
+                                {
+                                    await Task.Run(new Action(() => this.database.AddDownloadedList(dlb))).ConfigureAwait(false);
+                                }
+                                dlb.Downloaded = true;
                             }
-                            dlb.Downloaded = true;
+                        }
+
+                        string tmpStr = System.Text.Encoding.Default.GetString(ms.ToArray());
+                        this.Dispatcher.Invoke(new Action(() =>
+                        {
+                            Clipboard.Clear();
+                            Clipboard.SetData(DataFormats.Text, tmpStr);
+                        }));
+
+                        using (FileStream fs = new FileStream(dialog.FileName, FileMode.Create))
+                        {
+                            await fs.WriteAsync(ms.ToArray(), 0, (int)ms.Length).ConfigureAwait(false);
                         }
                     }
-
-                    string tmpStr = System.Text.Encoding.Default.GetString(ms.ToArray());
-                    this.Dispatcher.Invoke(new Action(() =>
-                    {
-                        Clipboard.Clear();
-                        Clipboard.SetData(DataFormats.Text, tmpStr);
-                    }));
-
-                    using (FileStream fs = new FileStream(dialog.FileName, FileMode.Create))
-                    {
-                        await fs.WriteAsync(ms.ToArray(), 0, (int)ms.Length).ConfigureAwait(false);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 await pdc.CloseAsync();
             }
