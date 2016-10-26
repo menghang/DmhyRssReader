@@ -287,7 +287,7 @@ namespace DmhyRssReader
                         this.Dispatcher.Invoke(new Action(() =>
                         {
                             Clipboard.Clear();
-                            Clipboard.SetData(DataFormats.Text, tmpStr);
+                            Clipboard.SetDataObject(tmpStr);
                         }));
 
                         using (FileStream fs = new FileStream(dialog.FileName, FileMode.Create))
