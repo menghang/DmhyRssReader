@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Weavers VerifyAssembly="true">
+  <Costura 
+    IncludeDebugSymbols='false' 
+    DisableCleanup='true'
+    Unmanaged32Assemblies='SQLite.Interop' 
+    Unmanaged64Assemblies='SQLite.Interop' />
+</Weavers>
